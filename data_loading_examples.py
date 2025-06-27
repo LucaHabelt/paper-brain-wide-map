@@ -64,7 +64,7 @@ one = ONE(base_url='https://openalyx.internationalbrainlab.org', password='inter
 
 # The bwm_units function downloads the relevant data tables and takes care of the filtering. The input parameters
 # shown are the default values, which are used in the paper, but you can change them to suit your needs.
-unit_df = bwm_units(one, rt_range=(0.08, 0.2), min_errors=3, min_qc=1., min_units_sessions=(10, 2))
+unit_df = bwm_units(one, rt_range=(0.08, 0.2), min_errors=3, min_qc=1., min_units_sessions=(10, 2), enforce_version=True)
 
 # rt_range -- the admissible range of trial length measured by goCue_time (start) and feedback_time (end)
 # min_errors -- the minimum number of error trials per session after other criteria are applied
@@ -72,3 +72,5 @@ unit_df = bwm_units(one, rt_range=(0.08, 0.2), min_errors=3, min_qc=1., min_unit
 # min_units_sessions -- the first entry is the minimum of units per session per region for a session to be retained, the
 #                       second entry is the minimum number of those sessions per region for a region to be retained
 #                       (can be set to None to avoid this filter)
+# enforce_version -- flag to enforce absolute reproducibility of input data: if True, the function will assert
+# that the clusters uuids exactly match the ones used in the paper. Set to False if you want to modify the selection criteria.
