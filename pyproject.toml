@@ -1,3 +1,27 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brainwidemap"
+version = "1.0.0a"
+description = "Github repo for code associated with IBL brainwide map paper"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "IBL"}
+]
+urls = {Homepage = "https://www.internationalbrainlab.org/"}
+dynamic = ["dependencies"]
+
+[tool.setuptools]
+packages = {find = {exclude = ["scratch", "tests"]}}
+include-package-data = true
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
 [tool.isort]
 profile = "black"
 known_first_party = ["ibllib", "iblutil", "one", "brainbox", "neurencoding"]

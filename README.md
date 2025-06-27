@@ -12,16 +12,19 @@ This usually takes a few minutes on a fast internet connection and a consumer la
 
 ## Create a new python environment (optional)
 
-Install [Anaconda](https://www.anaconda.com/distribution/#download-section) and [git](https://git-scm.com/downloads), 
+Install [uv](https://docs.astral.sh/uv/) and [git](https://git-scm.com/downloads), 
 and follow their installer instructions to add each to the system path
 
 Create new python environment
-```
-conda create --name ibl_bwm python=3.10
+```shell
+uv venv --python 3.13
 ```
 Activate environment
-```
-conda activate ibl_bwm
+```shell
+# linux and mac
+source .venv/bin/activate
+# on Windows
+.venv\Scripts\activate
 ```
 
 ## Setup the paper-brain-wide-map repository
@@ -41,7 +44,7 @@ Note a frozen set of requirements is provided in `requirements_frozen.txt` for r
 
 The installation will rely on `requirements.txt` to maintain compatibility with the latest scientific Python ecosystem.
 ```
-pip install -e .
+uv pip install -e .
 ```
 
 To install additional requirements for the individual analyses, see the README files in the respective subfolders in `brainwidemap`
