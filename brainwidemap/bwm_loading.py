@@ -384,7 +384,7 @@ def download_aggregate_tables(one, target_path=None, type='clusters', tag='2024_
     }
     if target_path is None:
         target_path = Path(one.cache_dir).joinpath('bwm_tables')
-        target_path.mkdir(exist_ok=True)
+        target_path.mkdir(exist_ok=True, parents=True)
     else:
         assert target_path.exists(), 'The target_path you passed does not exist.'
 
