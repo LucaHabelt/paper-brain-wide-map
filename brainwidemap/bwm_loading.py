@@ -156,16 +156,38 @@ def load_good_units(one, pid, compute_metrics=False, qc=1., **kwargs):
     spikes, clusters, channels = spike_loader.load_spike_sorting(revision="2024-05-06", good_units=download_good_units_only)
     clusters_labeled = SpikeSortingLoader.merge_clusters(
         spikes, clusters, channels, compute_metrics=compute_metrics).to_df()
-    iok = clusters_labeled['label'] >= qc
-    good_clusters = clusters_labeled[iok]
-
+    if qc >= 0:
+        iok = clusters_labeled['label'] >= qc
+        good_clusters = clusters_labeled[iok]
+    elif qc == -1:  # load unitrefine model
+        good_clusters = apply_unit_refine_model(clusters_labeled)
+    elif qc == -2: # pseudo-random selection of extra unit refine units
+        iok = clusters_labeled['label'] == 0
+        good_clusters = apply_unit_refine_model(clusters_labeled)
+        # we take a random selection of units to make up the count to nur unit
+        n_extra = good_clusters.shape[0] - np.sum(iok)
+        if n_extra > 0:
+            iok[np.random.choice( np.where(~iok.values)[0], size=n_extra, replace=False)] = True
+        good_clusters = clusters_labeled[iok]
     spike_idx, ib = ismember(spikes['clusters'], good_clusters.index)
     good_clusters.reset_index(drop=True, inplace=True)
     # Filter spike trains for only good clusters
     good_spikes = {k: v[spike_idx] for k, v in spikes.items()}
     good_spikes['clusters'] = good_clusters.index[ib].astype(np.int32)
-
     return good_spikes, good_clusters
+
+
+def apply_unit_refine_model(clusters_labeled):
+    import yaml
+    from xgboost import XGBClassifier
+    path_model = Path('/Users/olivier/Documents/datadisk/unitrefine/alejandro/AlejandroPanVazquez_IBL_slim-mushroom-alligator')
+    path_model = Path(path_model)
+    with open(path_model.joinpath("meta.yaml")) as f:
+        metadata = yaml.safe_load(f)
+    classifier = XGBClassifier(model_file=path_model.joinpath("model.ubj"))
+    classifier.load_model(path_model.joinpath("model.ubj"))
+    pred = classifier.predict(clusters_labeled.loc[:, metadata['FEATURES']])
+    return clusters_labeled[np.array(metadata['CLASSES'])[pred] == 'good']
 
 
 def merge_probes(spikes_list, clusters_list):
