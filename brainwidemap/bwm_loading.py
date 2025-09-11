@@ -159,11 +159,21 @@ def load_good_units(one, pid, compute_metrics=False, qc=1., **kwargs):
     if qc >= 0:
         iok = clusters_labeled['label'] >= qc
         good_clusters = clusters_labeled[iok]
-    elif qc == -1:  # load unitrefine model
-        good_clusters = apply_unit_refine_model(clusters_labeled)
-    elif qc == -2: # pseudo-random selection of extra unit refine units
+    elif qc == -1:  # load sirena model
+        good_clusters = apply_sirena_model(clusters_labeled)
+    elif qc == -2: # pseudo-random selection of extra sirena units
         iok = clusters_labeled['label'] == 0
-        good_clusters = apply_unit_refine_model(clusters_labeled)
+        good_clusters = apply_sirena_model(clusters_labeled)
+        # we take a random selection of units to make up the count to nur unit
+        n_extra = good_clusters.shape[0] - np.sum(iok)
+        if n_extra > 0:
+            iok[np.random.choice( np.where(~iok.values)[0], size=n_extra, replace=False)] = True
+        good_clusters = clusters_labeled[iok]
+    elif qc == -3:  # load unitrefine model
+        good_clusters = apply_unitrefine_model(eid, pname, clusters_labeled)
+    elif qc == -4: # pseudo-random selection of extra unit refine units
+        iok = clusters_labeled['label'] == 0
+        good_clusters = apply_unitrefine_model(eid, pname, clusters_labeled)
         # we take a random selection of units to make up the count to nur unit
         n_extra = good_clusters.shape[0] - np.sum(iok)
         if n_extra > 0:
@@ -177,10 +187,17 @@ def load_good_units(one, pid, compute_metrics=False, qc=1., **kwargs):
     return good_spikes, good_clusters
 
 
-def apply_unit_refine_model(clusters_labeled):
+def apply_unitrefine_model(eid, pname, df_clusters):
+    # here we just load the predictions
+    path_prediction = Path('/datadisk/Data/2025/09_unit-refine/predictions/spike_times_based_model_no_snr/eid_pnames')
+    clusters_labeled = pd.read_parquet(path_prediction.joinpath(f"{eid}_{pname}.pqt"))
+    return df_clusters[clusters_labeled['unitrefine_label'] == 1]
+
+
+def apply_sirena_model(clusters_labeled):
     import yaml
     from xgboost import XGBClassifier
-    path_model = Path('/Users/olivier/Documents/datadisk/unitrefine/alejandro/AlejandroPanVazquez_IBL_slim-mushroom-alligator')
+    path_model = Path('/datadisk/Data/2025/09_unit-refine/models/AlejandroPanVazquez_IBL_slim-mushroom-alligator')
     path_model = Path(path_model)
     with open(path_model.joinpath("meta.yaml")) as f:
         metadata = yaml.safe_load(f)
