@@ -1,5 +1,11 @@
 # paper-brain-wide-map
-Code related to the brainwide map paper
+Code related to the brainwide map paper: 
+International Brain Laboratory., Angelaki, D., Benson, B. et al. A brain-wide map of neural activity during complex behaviour. Nature 645, 177–191 (2025). https://doi.org/10.1038/s41586-025-09235-0
+Find editable figures and latex text here: https://github.com/int-brain-lab/Brainwide-Map-Paper
+
+
+And companion paper:
+Findling, C., Hubert, F., International Brain Laboratory. et al. Brain-wide representations of prior information in mouse decision-making. Nature 645, 192–200 (2025). https://doi.org/10.1038/s41586-025-09226-1
 
 # Contents
 
