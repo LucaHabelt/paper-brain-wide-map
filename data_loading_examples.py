@@ -3,6 +3,7 @@ from brainbox.io.one import SessionLoader
 
 from brainwidemap import bwm_query, load_good_units, load_trials_and_mask, bwm_units
 
+
 """
 Example 1:
 ==========
