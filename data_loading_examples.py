@@ -1,5 +1,7 @@
 from one.api import ONE
 from brainbox.io.one import SessionLoader
+from iblatlas.regions import BrainRegions
+
 
 from brainwidemap import bwm_query, load_good_units, load_trials_and_mask, bwm_units
 
@@ -65,7 +67,12 @@ one = ONE(base_url='https://openalyx.internationalbrainlab.org', password='inter
 
 # The bwm_units function downloads the relevant data tables and takes care of the filtering. The input parameters
 # shown are the default values, which are used in the paper, but you can change them to suit your needs.
-unit_df = bwm_units(one, rt_range=(0.08, 0.2), min_errors=3, min_qc=1., min_units_sessions=(10, 2))
+unit_df = bwm_units(one)
+br = BrainRegions()
+unit_df["acronym"] = br.get(unit_df["atlas_id"].to_numpy()).acronym
+rt_units = unit_df[unit_df["acronym"] == "RT"].copy()
+
+#unit_df = unit_df(one, rt_range=(0.08, 0.2), min_errors=3, min_qc=1., min_units_sessions=(10, 2))
 
 # rt_range -- the admissible range of trial length measured by goCue_time (start) and feedback_time (end)
 # min_errors -- the minimum number of error trials per session after other criteria are applied

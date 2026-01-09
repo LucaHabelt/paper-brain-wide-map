@@ -26,22 +26,24 @@ insertions_rt = one.search_insertions(atlas_acronym='RT', datasets='spikes.times
 print(f"Found {len(insertions_rt)} insertions in RT")
 print(insertions_rt)
 
-pid = insertions_rt[0]
-[eid, pname] = one.pid2eid(pid)
+for i in range(25):
+    pid = insertions_rt[i]
+    [eid, pname] = one.pid2eid(pid)
 
-ssl = SpikeSortingLoader(pid=pid, one=one, atlas=ba)
-spikes, clusters, channels = ssl.load_spike_sorting()
-clusters = ssl.merge_clusters(spikes, clusters, channels)
+    ssl = SpikeSortingLoader(pid=pid, one=one, atlas=ba)
+    spikes, clusters, channels = ssl.load_spike_sorting()
+    clusters = ssl.merge_clusters(spikes, clusters, channels)
 
-good_cluster_idx = clusters['label'] == 1
-good_cluster_IDs = clusters['cluster_id'][good_cluster_idx]
+    good_cluster_idx = clusters['label'] == 1
+    good_cluster_IDs = clusters['cluster_id'][good_cluster_idx]
 
-clusters_g = {key: val[good_cluster_idx] for key, val in clusters.items()}
+    clusters_g = {key: val[good_cluster_idx] for key, val in clusters.items()}
 
-good_spk_indx = np.where(np.isin(spikes['clusters'], good_cluster_IDs))
-spikes_g = {key: val[good_spk_indx] for key, val in spikes.items()}
+    good_spk_indx = np.where(np.isin(spikes['clusters'], good_cluster_IDs))
+    spikes_g = {key: val[good_spk_indx] for key, val in spikes.items()}
 
-num_neuron = len(np.unique(spikes_g['clusters']))
+    num_neuron = len(np.unique(spikes_g['clusters']))
+    print(pid, num_neuron)
 
 # load trial data
 sl = SessionLoader(eid=eid, one=one)
@@ -77,7 +79,7 @@ cluster_g_acr = region_acr_ch[clusters_g['channels']]
 # Print each unit's brain region label
 print(cluster_g_acr)
 
-# Take the index of units in SCm
+# Take the index of units in RT
 indx_rt = np.where(cluster_g_acr == 'RT')[0]
 cluster_RT_IDs = good_cluster_IDs[indx_rt]
 nunit = len(cluster_RT_IDs)
@@ -126,3 +128,4 @@ ax[0].set_yticks(ytick_loc)
 ax[1].set_yticks(ytick_loc)
 ax[0].set_yticklabels(['unit #1'])
 ax[1].set_yticklabels(['unit #1'])
+
