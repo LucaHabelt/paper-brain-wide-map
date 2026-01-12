@@ -9,24 +9,13 @@ from iblatlas.regions import BrainRegions
 from brainwidemap import bwm_query, load_good_units, load_trials_and_mask, bwm_units
 from iblatlas.atlas import AllenAtlas
 from brainbox.io.one import SpikeSortingLoader, SessionLoader
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-# ---------- PSTH helpers ----------
-def aligned_counts(spike_times, event_times, t_before=0.5, t_after=1.0, bin_size=0.01):
-    edges = np.arange(-t_before, t_after + bin_size, bin_size)
-    counts = np.zeros((event_times.size, edges.size - 1), dtype=float)
-    for i, t0 in enumerate(event_times):
-        rel = spike_times[(spike_times >= t0 - t_before) & (spike_times <= t0 + t_after)] - t0
-        counts[i], _ = np.histogram(rel, bins=edges)
-    rate = counts / bin_size
-    t = (edges[:-1] + edges[1:]) / 2
-    return t, rate
 
-
-def get_unit_spike_times(unit_id):
-    return spikes["times"][spikes["clusters"] == unit_id]
 
 
 """
@@ -44,6 +33,8 @@ insertions_rt = one.search_insertions(atlas_acronym='RT', datasets='spikes.times
 insertions_val = one.search_insertions(atlas_acronym='VAL', datasets='spikes.times.npy', project='brainwide')
 insertions_vm = one.search_insertions(atlas_acronym='VM', datasets='spikes.times.npy', project='brainwide')
 insertions_vpl = one.search_insertions(atlas_acronym='VPL', datasets='spikes.times.npy', project='brainwide')
+insertions_gpe = one.search_insertions(atlas_acronym='GPe', datasets='spikes.times.npy', project='brainwide')
+insertions_gpi = one.search_insertions(atlas_acronym='GPi', datasets='spikes.times.npy', project='brainwide')
 
 
 
@@ -51,10 +42,25 @@ insertions_vpl = one.search_insertions(atlas_acronym='VPL', datasets='spikes.tim
 PSTH for target area units relative to task epochs
 """
 
-area = "VPL"
+area = "GPi"
 
-for pid in tqdm(insertions_vpl[4:26]):
-#pid = 'ca073754-be17-43b7-a38a-0c1e5563ff32'
+for pid in tqdm(insertions_gpi[:8]):
+#pid = '4994543f-20e8-4421-adca-8739984e07ad'
+
+# ---------- PSTH helpers ----------
+    def aligned_counts(spike_times, event_times, t_before=0.5, t_after=1.0, bin_size=0.01):
+        edges = np.arange(-t_before, t_after + bin_size, bin_size)
+        counts = np.zeros((event_times.size, edges.size - 1), dtype=float)
+        for i, t0 in enumerate(event_times):
+            rel = spike_times[(spike_times >= t0 - t_before) & (spike_times <= t0 + t_after)] - t0
+            counts[i], _ = np.histogram(rel, bins=edges)
+        rate = counts / bin_size
+        t = (edges[:-1] + edges[1:]) / 2
+        return t, rate
+
+
+    def get_unit_spike_times(unit_id):
+        return spikes["times"][spikes["clusters"] == unit_id]
 
     # ---------- load spikes / clusters / channels ----------
     ssl = SpikeSortingLoader(pid=pid, one=one, atlas=ba)
@@ -68,6 +74,8 @@ for pid in tqdm(insertions_vpl[4:26]):
 
     area_unit_ids = clusters["cluster_id"][good & (cluster_acr == area)]
     print(f"{area} good units on this probe:", len(area_unit_ids))
+    if len(area_unit_ids) == 0:
+        continue
 
     # ---------- load trial events ----------
     eid, _ = one.pid2eid(pid)
@@ -78,7 +86,8 @@ for pid in tqdm(insertions_vpl[4:26]):
     event_name = "firstMovement_times"   # try also: "firstMovement_times", "stimOn_times", "feedback_times"
     events = sl.trials[event_name].to_numpy()
     events = events[~np.isnan(events)]
-
+    if events.size == 0:
+        continue
 
 
     # ---------- all RT units on this probe (heatmap + mean) ----------
