@@ -79,7 +79,7 @@ for pid in tqdm(insertions_rt[:25]):
     sl.load_trials()
 
     # pick an epoch/event to align to (choose one that exists in your trials table)
-    event_name = "firstMovement_times"   # try also: "stimOn_times", "feedback_times"
+    event_name = "firstMovement_times"   # try also: "firstMovement_times", "stimOn_times", "feedback_times"
     events = sl.trials[event_name].to_numpy()
     events = events[~np.isnan(events)]
 
@@ -117,7 +117,8 @@ for pid in tqdm(insertions_rt[:25]):
     plt.colorbar(label="Hz")
     #plt.show()
 
-    plt.savefig(fr"Z:\home\lh1192\Backup_2025_11_03\PhD\TRN\IBL_BWM_plots\PSTH_moveonset_singleprobe_v02\TRN_PSTH_heatmap_{pid}.svg")
+    #plt.savefig(fr"Z:\home\lh1192\Backup_2025_11_03\PhD\TRN\IBL_BWM_plots\PSTH_stimulusonset_singleprobe\TRN_PSTH_heatmap_{pid}.svg")
+    #plt.close()
 
     plt.figure()
     for r in all_rates:
@@ -130,8 +131,81 @@ for pid in tqdm(insertions_rt[:25]):
     plt.title(f"PID {pid} | RT population mean PSTH")
     #plt.show()
 
-    plt.savefig(fr"Z:\home\lh1192\Backup_2025_11_03\PhD\TRN\IBL_BWM_plots\PSTH_moveonset_singleprobe_v02\TRN_population_mean_PSTH_{pid}.svg")
-    plt.close()
+    #plt.savefig(fr"Z:\home\lh1192\Backup_2025_11_03\PhD\TRN\IBL_BWM_plots\PSTH_stimulusonset_singleprobe\TRN_population_mean_PSTH_{pid}.svg")
+    #plt.close()
+
+
+
+
+"""
+Visualization of Stimulus movement onset time interval 
+"""
+
+
+rows = []
+
+for pid in tqdm(insertions_rt[:25]):
+    eid, _ = one.pid2eid(pid)
+
+    sl = SessionLoader(eid=eid, one=one)
+    sl.load_trials()
+    tr = sl.trials
+
+    stim = tr["stimOn_times"].to_numpy()
+    move = tr["firstMovement_times"].to_numpy()
+
+    ok = (~np.isnan(stim)) & (~np.isnan(move))
+    dt = move[ok] - stim[ok]
+
+    # optional: keep only movements after stim
+    dt = dt[dt >= 0]
+
+    rows.append({
+        "pid": str(pid),
+        "eid": str(eid),
+        "n_trials": int(dt.size),
+        "dt_mean_s": float(np.mean(dt)) if dt.size else np.nan,
+        "dt_sd_s": float(np.std(dt, ddof=1)) if dt.size > 1 else np.nan,
+        "dt_median_s": float(np.median(dt)) if dt.size else np.nan,
+    })
+
+dt_df = pd.DataFrame(rows)
+dt_df
+
+
+plt.figure()
+plt.hist(dt_df["dt_mean_s"].dropna(), bins=50)
+plt.xlabel("Mean (firstMovement - stimOn) per probe (s)")
+plt.ylabel("Number of probes")
+plt.title("Movement latency relative to stimulus (per probe)")
+plt.show()
+
+
+
+x = np.arange(len(dt_df))
+
+plt.figure(figsize=(10, 4))
+
+plt.errorbar(
+    x,
+    dt_df["dt_mean_s"],
+    yerr=dt_df["dt_sd_s"],
+    fmt="o",
+    capsize=4
+)
+
+for i, n in enumerate(dt_df["n_trials"]):
+    plt.text(i, dt_df["dt_mean_s"].iloc[i], f"n={n}",
+             ha="center", va="bottom", fontsize=8)
+
+plt.xticks(x, [pid[:8] for pid in dt_df["pid"]], rotation=45)
+plt.ylabel("Movement − stimulus latency (s)")
+plt.xlabel("Probe (pid)")
+plt.title("Reaction time per probe (mean ± SD)")
+
+plt.tight_layout()
+plt.show()
+
 
 
 """
