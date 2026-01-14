@@ -72,11 +72,16 @@ insertions_gpe = one.search_insertions(atlas_acronym='GPe', datasets='spikes.tim
 insertions_gpi = one.search_insertions(atlas_acronym='GPi', datasets='spikes.times.npy', project='brainwide')
 
 
-area = "RT"
+area = "VM"
 use_bootstrap_95ci = True
 
+Z_all = []
+t_ref = None
+event_name = "firstMovement_times"
 
-for pid in tqdm(insertions_rt[:len(insertions_rt)]):  #len(insertions_rt)
+
+
+for pid in tqdm(insertions_vm[:len(insertions_vm)]):  #len(insertions_rt)
 
 
     """ helpers """
@@ -159,29 +164,33 @@ for pid in tqdm(insertions_rt[:len(insertions_rt)]):  #len(insertions_rt)
 
     all_rates = np.vstack(all_rates)
 
+    if t_ref is None:
+        t_ref = t
+    else:
+        if len(t) != len(t_ref) or np.max(np.abs(t - t_ref)) > 1e-12:
+            raise RuntimeError("Time axis changed across probes.")
+
+    Z_all.append(all_rates)  # all_rates already z-scored per unit
 
 """Plot bootstrapped across units in specific area"""
-all_rates_z = all_rates
+all_rates_z = np.vstack(Z_all)   # (all units across all probes, n_bins)
 m = all_rates_z.mean(axis=0)
+n_units = all_rates_z.shape[0]
 
 plt.figure()
-plt.plot(t, m, color="black", linewidth=2)
+plt.plot(t_ref, m, color="black", linewidth=2)
 
-n_units = all_rates_z.shape[0]
 if use_bootstrap_95ci and n_units >= 2:
     lo, hi = bootstrap_ci_units(all_rates_z, n_boot=1000, seed=1)
-    plt.fill_between(t, lo, hi, color="black", alpha=0.3)
-    band = "95% CI"
+    plt.fill_between(t_ref, lo, hi, color="black", alpha=0.3)
 else:
     if n_units >= 2:
         sem = all_rates_z.std(axis=0, ddof=1) / np.sqrt(n_units)
-        plt.fill_between(t, m - sem, m + sem, color="black", alpha=0.3)
-    band = "± SEM"
+        plt.fill_between(t_ref, m - sem, m + sem, color="black", alpha=0.3)
 
 plt.axvline(0, linestyle="--")
 plt.xlabel(f"Time from {event_name} (s)")
 plt.ylabel("Mean (z)")
-plt.title(f"{area} | PID {pid} | mean {band} (n={n_units} units)")
-#plt.show()
+plt.title(f"{area} | ALL probes pooled | n={n_units} units")
 plt.savefig(
         fr"Z:\home\lh1192\Backup_2025_11_03\PhD\TRN\IBL_BWM_plots\PSTH_moveonset_zstack_bootstrap\{area}_PSTH_zstack_bootstrap.svg")
