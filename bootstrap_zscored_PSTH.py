@@ -70,9 +70,11 @@ insertions_vm = one.search_insertions(atlas_acronym='VM', datasets='spikes.times
 insertions_vpl = one.search_insertions(atlas_acronym='VPL', datasets='spikes.times.npy', project='brainwide')
 insertions_gpe = one.search_insertions(atlas_acronym='GPe', datasets='spikes.times.npy', project='brainwide')
 insertions_gpi = one.search_insertions(atlas_acronym='GPi', datasets='spikes.times.npy', project='brainwide')
+insertions_zi = one.search_insertions(atlas_acronym='ZI', datasets='spikes.times.npy', project='brainwide')
 
 
-area = "VM"
+
+area = "ZI"
 use_bootstrap_95ci = True
 
 Z_all = []
@@ -81,7 +83,7 @@ event_name = "firstMovement_times"
 
 
 
-for pid in tqdm(insertions_vm[:len(insertions_vm)]):  #len(insertions_rt)
+for pid in tqdm(insertions_zi[:len(insertions_zi)]):  #len(insertions_rt)
 
 
     """ helpers """

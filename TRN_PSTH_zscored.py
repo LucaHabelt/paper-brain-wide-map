@@ -70,11 +70,12 @@ insertions_vm = one.search_insertions(atlas_acronym='VM', datasets='spikes.times
 insertions_vpl = one.search_insertions(atlas_acronym='VPL', datasets='spikes.times.npy', project='brainwide')
 insertions_gpe = one.search_insertions(atlas_acronym='GPe', datasets='spikes.times.npy', project='brainwide')
 insertions_gpi = one.search_insertions(atlas_acronym='GPi', datasets='spikes.times.npy', project='brainwide')
+insertions_zi = one.search_insertions(atlas_acronym='ZI', datasets='spikes.times.npy', project='brainwide')
 
 
-area = "RT"
+area = "ZI"
 
-for pid in tqdm(insertions_rt[:len(insertions_rt)]):
+for pid in tqdm(insertions_zi[:len(insertions_zi)]):
 
 
     """ PSTH helpers """
