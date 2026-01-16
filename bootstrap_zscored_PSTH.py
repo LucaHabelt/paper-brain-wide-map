@@ -140,7 +140,7 @@ for area in areas:
         sl = SessionLoader(eid=eid, one=one)
         sl.load_trials()
 
-        event_name = "firstMovement_times"  # choose eent from: "firstMovement_times", "stimOn_times", "feedback_times"
+        event_name = "firstMovement_times"  # choose event from: "firstMovement_times", "stimOn_times", "feedback_times"
         events = sl.trials[event_name].to_numpy()
         events = events[~np.isnan(events)]
         if events.size == 0:
