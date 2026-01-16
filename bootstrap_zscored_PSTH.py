@@ -75,7 +75,7 @@ insertions_mo = one.search_insertions(atlas_acronym='MO', datasets='spikes.times
 insertions_MOp = one.search_insertions(atlas_acronym='MOp', datasets='spikes.times.npy', project='brainwide')
 insertions_MOs = one.search_insertions(atlas_acronym='MOs', datasets='spikes.times.npy', project='brainwide')
 
-areas = ["MOp", "MOs"]
+areas = ["MOs", "MOp"]
 insertions_by_area = {
     "MOp": insertions_MOp,
     "MOs": insertions_MOs,
@@ -84,11 +84,9 @@ insertions_by_area = {
 for area in areas:
 
     use_bootstrap_95ci = True
-
     Z_all = []
     t_ref = None
     event_name = "firstMovement_times"
-
 
 
     for pid in tqdm(insertions_by_area[area],desc=f"insertions_{area}"):

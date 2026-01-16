@@ -71,11 +71,13 @@ insertions_vpl = one.search_insertions(atlas_acronym='VPL', datasets='spikes.tim
 insertions_gpe = one.search_insertions(atlas_acronym='GPe', datasets='spikes.times.npy', project='brainwide')
 insertions_gpi = one.search_insertions(atlas_acronym='GPi', datasets='spikes.times.npy', project='brainwide')
 insertions_zi = one.search_insertions(atlas_acronym='ZI', datasets='spikes.times.npy', project='brainwide')
+insertions_mop = one.search_insertions(atlas_acronym='MOp', datasets='spikes.times.npy', project='brainwide')
+insertions_mos = one.search_insertions(atlas_acronym='MOs', datasets='spikes.times.npy', project='brainwide')
 
 
-area = "ZI"
+area = "MOa"
 
-for pid in tqdm(insertions_zi[:len(insertions_zi)]):
+for pid in tqdm(insertions_mos[:len(insertions_mos)]):
 
 
     """ PSTH helpers """
